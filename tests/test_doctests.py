@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Doctests of mllib"""
+from __future__ import unicode_literals, print_function, absolute_import
 
 import doctest
 import glob

@@ -1,6 +1,18 @@
 Changes log
 ===========
 
+1.0.0a4 (2017-02-09)
+--------------------
+
+- Nothing change yet.
+
+
+1.0.0a4.dev0 (2017-02-09)
+-------------------------
+
+- Migration du paquet, compatible python 2 et 3
+
+
 1.0.0a3
 -------
 

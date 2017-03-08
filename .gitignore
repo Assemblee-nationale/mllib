@@ -6,3 +6,6 @@ dist/
 *.pyo
 *.egg-info
 .idea/
+.eggs/
+*.bak
+*.back

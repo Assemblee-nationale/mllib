@@ -9,4 +9,5 @@ tests_directory = os.path.dirname(os.path.abspath(__file__))
 tests_abs_path = functools.partial(os.path.join, tests_directory)
 
 if 'MLLIB_TEST_SERVER' not in os.environ:
-    os.environ['MLLIB_TEST_SERVER'] = 'localhost:8000:admin:admin'
+    os.environ['MLLIB_TEST_SERVER'] = 'ref-dev-ml1:8000:admin:admin'
+    # os.environ['MLLIB_TEST_SERVER'] = 'localhost:8000:admin:admin'

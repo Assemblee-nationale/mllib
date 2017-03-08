@@ -6,7 +6,10 @@ Loading some documentation to the ML database
 """
 from __future__ import print_function, unicode_literals, absolute_import
 
-from cStringIO import StringIO
+from future import standard_library
+standard_library.install_aliases()
+from builtins import input
+from io import StringIO
 import logging
 import json
 import os
@@ -21,7 +24,7 @@ demo_doc_uris = []
 
 
 def hit_return():
-    raw_input("\nHit [Return] to continue:")
+    input("\nHit [Return] to continue:")
 
 if 'MLLIB_TEST_SERVER' not in os.environ:
     os.environ['MLLIB_TEST_SERVER'] = 'localhost:8000:admin:admin'
@@ -126,7 +129,7 @@ def ml_int_addition(value1, value2):
     """
     es = EvalService.from_envvar('MLLIB_TEST_SERVER')
     response = es.eval_post(xquery=ADDITION_XQY, vars={'value1': value1, 'value2': value2})
-    headers, document = response.iter_parts().next()
+    headers, document = next(response.iter_parts())
     assert headers['X-Primitive'] == 'integer'
     return int(document)
 

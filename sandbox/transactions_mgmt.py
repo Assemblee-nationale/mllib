@@ -8,10 +8,13 @@ Demo with transactions commiting / aborting
 """
 from __future__ import print_function, unicode_literals, absolute_import
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import input
 import json
 import logging
 import os
-from StringIO import StringIO
+from io import StringIO
 
 from mllib.documents import DocumentsService
 from mllib.transactions import TransactionsService
@@ -20,7 +23,7 @@ logging.basicConfig(level=logging.WARNING)  # Try "INFO" then "DEBUG" for more v
 
 
 def hit_return():
-    raw_input("\nHit [Return] to continue:")
+    input("\nHit [Return] to continue:")
 
 if 'MLLIB_TEST_SERVER' not in os.environ:
     os.environ['MLLIB_TEST_SERVER'] = 'localhost:8000:admin:admin'
