@@ -438,7 +438,6 @@ class ResponseAdapter(object):
                     state = states.BODY
                     chunks = []
                 else:
-                    print(line)
                     name, value = line.split(b':', 1)
                     headers[name.strip()] = value.strip()
 
