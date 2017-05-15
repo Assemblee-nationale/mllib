@@ -10,6 +10,7 @@ Global REST server access
 
 from __future__ import unicode_literals, print_function, absolute_import
 
+from builtins import object
 import os
 from functools import partial as ft_partial
 
@@ -21,7 +22,7 @@ from .mlexceptions import MarkLogicServerError
 
 class RESTClient(object):
     """The base RESTClient class (needs to be subclassed)"""
-    def __init__(self, hostname, port, username, password, authtype='digest'):
+    def __init__(self, hostname, port, username, password,  database=None, authtype='digest'):
         """
         :param hostname: or IP address of the REST server
         :param port: listening port of the REST server (int or str)
@@ -41,6 +42,7 @@ class RESTClient(object):
         self.rest_patch = ft_partial(self.rest_do, 'patch')
         self.rest_put = ft_partial(self.rest_do, 'put')
         self.rest_delete = ft_partial(self.rest_do, 'delete')
+        self.database = database
 
     @classmethod
     def from_envvar(cls, varname):
@@ -58,7 +60,7 @@ class RESTClient(object):
         requests_func = getattr(requests, http_verb)
 
         # See http://docs.marklogic.com/guide/rest-dev/intro#id_34966 for ML error reporting
-        rest_errors_format = {'X-Error-Accept': b'application/json'}
+        rest_errors_format = {'X-Error-Accept': 'application/json'}
         kwargs.setdefault('headers', {}).update(rest_errors_format)
 
         response = requests_func(service_url, *args, auth=self.authentication, **kwargs)

@@ -10,7 +10,7 @@ A REST client for MarkLogic 8
 from setuptools import setup, find_packages
 import os, sys
 
-version = '1.0.0a3'
+version = '1.0.1'
 
 this_directory = os.path.abspath(os.path.dirname(__file__))
 
@@ -39,6 +39,7 @@ setup(name='mllib',
           "Development Status :: 2 - Pre-Alpha",
           "Programming Language :: Python",
           "Programming Language :: Python :: 2.7",
+          "Programming Language :: Python :: 3.5",
           "Topic :: Software Development :: Documentation",
           "Topic :: Database :: Front-Ends",
           "License :: OSI Approved :: MIT License",

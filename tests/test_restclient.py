@@ -29,9 +29,9 @@ class RestClientTest(unittest.TestCase):
         params = {'foo': 'bar'}
         response = self.client.rest_get('/get', params=params)
         self.assertTrue(response.ok)
-        body = json.loads(response.content)
+        body = json.loads(response.text)
         self.assertDictEqual(body['args'], params)
-        self.assertDictContainsSubset({'X-Error-Accept': b'application/json'}, body['headers'])
+        self.assertDictContainsSubset({'X-Error-Accept': 'application/json'}, body['headers'])
 
     def test_rest_post(self):
         """RESTClient.rest_post()"""
@@ -55,9 +55,9 @@ class RestClientTest(unittest.TestCase):
         data = {'one': 'two'}
         response = req_func(path, params=params, data=data)
         self.assertTrue(response.ok)
-        body = json.loads(response.content)
+        body = json.loads(response.text)
         self.assertDictEqual(body['args'], params)
-        self.assertDictContainsSubset({'X-Error-Accept': b'application/json'}, body['headers'])
+        self.assertDictContainsSubset({'X-Error-Accept': 'application/json'}, body['headers'])
         self.assertDictContainsSubset(data, body['form'])
 
     def test_rest_exception(self):

@@ -9,10 +9,15 @@ Misc inner utilities
 
 from __future__ import unicode_literals, print_function, absolute_import
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import bytes
+from past.builtins import basestring
+from builtins import object
 import collections
 import mimetypes
 import re
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 import enum
 from requests.structures import CaseInsensitiveDict
@@ -27,6 +32,15 @@ else:
         return isinstance(obj, basestring)
 
 
+if HAVE_PYTHON3:
+    def ft_bytes(obj):
+        return bytes(obj, encoding='utf-8')
+else:
+    def ft_bytes(obj):
+        obj = obj.encode('utf-8')
+        return obj
+
+
 def dict_pop(mapping, *keys):
     """Returns a new mapping with keys + values taken from original mapping.
      Keys are removed from original mapping
@@ -38,14 +52,14 @@ def dict_pop(mapping, *keys):
     .. code:: pycon
 
        >>> orig = {'a': 1, 'b': 2, 'c': 3}
-       >>> dict_pop(orig, 'a', 'b', 'z')
-       {u'a': 1, u'b': 2}
-       >>> orig
-       {u'c': 3}
+       >>> dict_pop(orig, 'a', 'b', 'z') == {'a': 1, 'b': 2}
+       True
+       >>> orig == {'c': 3}
+       True
        >>> dict_pop(orig)
        {}
-       >>> orig
-       {u'c': 3}
+       >>> orig == {'c': 3}
+       True
     """
     return {k: mapping.pop(k) for k in keys if k in mapping}
 
@@ -61,8 +75,8 @@ def guess_mimetype(filename):
 
     .. code:: pycon
 
-       >>> guess_mimetype('foo.json')
-       u'application/json'
+       >>> guess_mimetype('foo.json') == ('application/json')
+       True
     """
     mt, _ = mimetypes.guess_type(filename)
     if mt is None:
@@ -79,7 +93,7 @@ class KwargsSerializer(object):
           - '*': Zero or more parameter
           - '+': One or more parameter
         """
-        assert frozenset(specs.values()) <= {'!', '?', '+', '*'}
+        assert frozenset(list(specs.values())) <= {'!', '?', '+', '*'}
         self.specs = specs
 
     def request_params(self, kwargs, params=None):
@@ -94,13 +108,13 @@ class KwargsSerializer(object):
         ignored = {}
 
         # Checking required parameters
-        for name, req in self.specs.iteritems():
+        for name, req in self.specs.items():
             if req not in ('!', '+'):
                 continue
             if name not in kwargs:
                 raise ValueError("{0} keyword argument must be provided".format(name))
 
-        for name, value in kwargs.iteritems():
+        for name, value in kwargs.items():
             if name not in self.specs:
                 ignored[name] = value
                 continue
@@ -131,7 +145,7 @@ class KwargsSerializer(object):
 
             # Special effect for 'perm', 'prop' and 'trans' parameters
             if name in ('perm', 'prop', 'trans'):
-                for subname, subvalue in value.iteritems():
+                for subname, subvalue in value.items():
                     new_key = "{0}:{1}".format(name, subname)
                     if new_key in params:
                         params[new_key].append(subvalue)
@@ -143,7 +157,7 @@ class KwargsSerializer(object):
 
 # Validators for unique value
 
-ident_rx = re.compile(r"^[_A-Za-z]\w*$")
+ident_rx = re.compile(r"^[_A-Za-z](\w|-)*$")
 filename_rx = re.compile(r"^([_\w](\w|\-)*)(\.(\w*))?$")
 
 
@@ -305,7 +319,7 @@ class is_mapping(object):
                 if not is_string(key):
                     return False
 
-        for value in obj.itervalues():
+        for value in obj.values():
             if callable(self.allowed_values):
                 if not self.allowed_values(value):
                     return False
@@ -352,8 +366,8 @@ def parse_mimetype(mimetype):
     :rtype: tuple
     Example:
 
-        >>> parse_mimetype('text/html; charset=utf-8')
-        (u'text', u'html', u'', {u'charset': u'utf-8'})
+        >>> parse_mimetype('text/html; charset=utf-8') == ('text', 'html', '', {'charset': 'utf-8'})
+        True
     """
     if not mimetype:
         return '', '', '', {}
@@ -388,12 +402,17 @@ class ResponseAdapter(object):
         self.response = response
         ct = response.headers.get('content-type', UNKNOWN_MIMETYPE)
         self.maintype, self.subtype, self.extra_type, self.ct_options = parse_mimetype(ct)
-        self.boundary = bytes(self.ct_options['boundary']) if 'boundary' in self.ct_options else None
+        self.boundary = bytes(self.ct_options['boundary'], encoding='utf-8') if 'boundary' in self.ct_options else None
 
     def is_multipart_mixed(self):
         return (self.maintype, self.subtype) == ('multipart', 'mixed')
+    
+    def iter_text(self):
+        for part in self.iter_parts(decode_unicode=True):
+            yield part
 
-    def iter_parts(self):
+    def iter_parts(self, decode_unicode=False):
+        # type: (object) -> object
         """Yields tuples of (headers, body) for each part of the response
         """
         # WTF, we do not always have a Content-Length response header. Why ?
@@ -405,7 +424,8 @@ class ResponseAdapter(object):
         parts_end_marker = b'--' + self.boundary + b'--'
         states = enum.Enum('states', ('BOUNDARY', 'HEADERS', 'BODY'))
         state = states.BOUNDARY
-        for line in self.response.iter_lines(chunk_size=STREAM_LINE_MAX_SIZE):
+        for line in self.response.iter_lines(chunk_size=STREAM_LINE_MAX_SIZE, decode_unicode=decode_unicode):
+            # line = line.decode('utf-8')
             if state == states.BOUNDARY:
                 # Waiting for headers
                 if line.strip() == part_start_marker:
@@ -414,11 +434,11 @@ class ResponseAdapter(object):
 
             elif state == states.HEADERS:
                 line = line.strip()
-                if line == '':
+                if line == b'':
                     state = states.BODY
                     chunks = []
                 else:
-                    name, value = line.split(':', 1)
+                    name, value = line.split(b':', 1)
                     headers[name.strip()] = value.strip()
 
             elif state == states.BODY:

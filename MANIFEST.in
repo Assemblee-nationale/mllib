@@ -2,3 +2,7 @@ include README.rst
 include doc/contributors.rst
 include doc/changes.rst
 prune tests
+include *.py
+recursive-include . *.py
+recursive-include tests *
+

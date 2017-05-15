@@ -17,4 +17,5 @@ else:
 from .resources import tests_directory
 
 def all_tests():
+    print(tests_directory)
     return unittest.defaultTestLoader.discover(tests_directory)
