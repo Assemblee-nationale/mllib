@@ -26,7 +26,7 @@ dev_require = ['Sphinx']
 if sys.version_info < (2, 7):
     dev_require += ['unittest2']
 
-install_requires = ['setuptools', 'requests']
+install_requires = ['setuptools', 'requests', 'future']
 if sys.version_info < (3, 4):
     install_requires += ['enum34']
 
@@ -50,7 +50,7 @@ setup(name='mllib',
       url='http://pypi.python.org/pypi/mllib',
       license='MIT',
       packages=find_packages('src'),
-      package_dir = {'': 'src'},
+      package_dir={'': 'src'},
       include_package_data=True,
       zip_safe=False,
       install_requires=install_requires,
