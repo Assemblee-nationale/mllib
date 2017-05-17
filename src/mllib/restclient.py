@@ -45,13 +45,13 @@ class RESTClient(object):
         self.database = database
 
     @classmethod
-    def from_envvar(cls, varname):
+    def from_envvar(cls, varname, default_host=None):
         """Make a :class:`RESTClient` instance from infos in an env var structured like
         "hostname:port:username:password[:authtype]"
 
         :param varname: Name of environment variable that holds connections info
         """
-        features = os.environ[varname]
+        features = os.environ.get(varname, default_host)
         return cls(*features.split(':'))
 
     def rest_do(self, http_verb, service_path, *args, **kwargs):
